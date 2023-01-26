@@ -15,6 +15,9 @@ RED = (255, 0, 0)
 BLUE = (50, 50, 255)
 SKY = (101, 202, 246)
 DKGREEN = (0, 100, 0)
+
+# create the enemy kill counter
+enemies_killed = 0
  
 # This class represents the player
 # It derives from the "Sprite" class in Pygame
@@ -142,10 +145,29 @@ class Enemy(pygame.sprite.Sprite):
 
         if self.collision:
             self.kill()
+            global enemies_killed 
+            enemies_killed = enemies_killed + 1
 
         if random.randint(0,3000) > 2990:
             spear = Spear(self.rect.x, self.rect.y)
             weapon_sprite_list.add(spear)
+
+def updateKillCount():
+    font = pygame.font.Font('freesansbold.ttf', 32)
+ 
+    # create a text surface object,
+    # on which text is drawn on it.
+    text = font.render('Kill Count: %i' % enemies_killed, True, BLACK)
+    
+    # create a rectangular object for the
+    # text surface object
+    textRect = text.get_rect()
+    
+    # set the center of the rectangular object.
+    textRect.center = (screen_width // 2, screen_height // 2)
+
+    screen.blit(text, textRect)
+    pygame.display.update()
 
 # Set the height and width of the screen
 size = [1400, 800]
@@ -153,8 +175,6 @@ screen = pygame.display.set_mode(size)
 
 screen_width = size[0]
 screen_height = size[1]
-
-obj_array = []
  
 # Don't display the mouse pointer
 pygame.mouse.set_visible(False)
@@ -211,6 +231,7 @@ while not done:
     poop_sprite_list.draw(screen)
     enemy_sprite_list.draw(screen)
     weapon_sprite_list.draw(screen)
+    updateKillCount()
 
     # Limit to 60 frames per second
     clock.tick(240)
