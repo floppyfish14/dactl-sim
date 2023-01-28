@@ -65,6 +65,7 @@ class Player(pygame.sprite.Sprite):
         self.rect.y = y
 
         self.collision = pygame.sprite.spritecollide(self, weapon_sprite_list, True)
+        self.collision = pygame.sprite.spritecollide(self, ufo_sprite_list, True)
         if self.collision:
             global start
             global done
@@ -202,7 +203,7 @@ class Stickman(pygame.sprite.Sprite):
             spear = Spear(self.rect.x, self.rect.y)
             weapon_sprite_list.add(spear)
 
-class Plane(pygame.sprite.Sprite):
+class Ufo(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
 
@@ -211,25 +212,30 @@ class Plane(pygame.sprite.Sprite):
         height = 15
 
         x = random.randint(0,screen_width)
-        y = random.randint(300,screen_height)
+        y = random.randint(0,screen_height-100)
 
-        self.image = pygame.image.load('plane.png')
+        self.image = pygame.image.load('ufo.png')
         self.rect = self.image.get_rect()
 
         self.rect.x = x
         self.rect.y = y
 
-        self.speed_x = random.randint(-5, 5)
+        self.speed_x = 7
+        self.speed_y = random.randint(0,7)
 
     def update(self):
 
-        self.collision = pygame.sprite.spritecollide(self, [poop_sprite_list,laser_sprite_list], True)
+        self.collision = pygame.sprite.spritecollide(self, poop_sprite_list, True)
+        self.collision = pygame.sprite.spritecollide(self, laser_sprite_list, True)
         self.rect.x += self.speed_x
+        self.rect.y += self.speed_y
 
         self.rect.clamp_ip(0, 0, screen_width-20, screen_height-60)
 
         if self.rect.x == 0 or self.rect.right >= screen_width-20:
             self.speed_x = -self.speed_x
+        if self.rect.y == 0 or self.rect.bottom >= screen_height-100:
+            self.speed_y = -self.speed_y
 
         if self.collision:
             self.kill()
@@ -281,7 +287,7 @@ def clear_data():
     global done
     global start
     global enemies_killed
-    global enemy_sprite_list
+    global stickman_sprite_list
     global player_sprite_list
     global poop_sprite_list
     global weapon_sprite_list
@@ -290,7 +296,7 @@ def clear_data():
     done = False
     start = False
 
-    enemy_sprite_list.empty()
+    stickman_sprite_list.empty()
     weapon_sprite_list.empty()
     poop_sprite_list.empty()
     pygame.display.update()
@@ -317,9 +323,9 @@ clock = pygame.time.Clock()
 # added to this list. The list is managed by a class called 'Group.'
 player_sprite_list = pygame.sprite.Group()
 poop_sprite_list = pygame.sprite.Group()
-enemy_sprite_list = pygame.sprite.Group()
+stickman_sprite_list = pygame.sprite.Group()
 weapon_sprite_list = pygame.sprite.Group()
-plane_sprite_list = pygame.sprite.Group()
+ufo_sprite_list = pygame.sprite.Group()
 laser_sprite_list = pygame.sprite.Group()
 
 
@@ -333,9 +339,15 @@ player_sprite_list.add(player)
 while not done:
     cursor_pos = pygame.mouse.get_pos()
 
-    while len(enemy_sprite_list) < 5:
+    plane_rng = random.randint(0,1000)
+    if len(ufo_sprite_list) < 5:
+        if plane_rng > 990:
+            ufo = Ufo()
+            ufo_sprite_list.add(ufo)
+
+    while len(stickman_sprite_list) < 5:
         stickman = Stickman()
-        enemy_sprite_list.add(stickman)
+        stickman_sprite_list.add(stickman)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -349,15 +361,13 @@ while not done:
                 laser_sprite_list.add(Laser(cursor_pos))
             if event.key == pygame.K_f:
                 player.turn_around()
-        # detect letter a or j
-        # shoot laser based on letter
 
     # --- Game logic
     player_sprite_list.update()
     poop_sprite_list.update()
-    enemy_sprite_list.update()
+    stickman_sprite_list.update()
     weapon_sprite_list.update()
-    plane_sprite_list.update()
+    ufo_sprite_list.update()
     laser_sprite_list.update()
  
     # --- Display / Drawing code
@@ -374,9 +384,9 @@ while not done:
     # Update the position of the sprites and draw them
     player_sprite_list.draw(screen)
     poop_sprite_list.draw(screen)
-    enemy_sprite_list.draw(screen)
+    stickman_sprite_list.draw(screen)
     weapon_sprite_list.draw(screen)
-    plane_sprite_list.draw(screen)
+    ufo_sprite_list.draw(screen)
     laser_sprite_list.draw(screen)
 
     if start == True:
