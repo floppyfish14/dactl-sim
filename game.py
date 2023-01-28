@@ -149,7 +149,7 @@ class Enemy(pygame.sprite.Sprite):
             global enemies_killed 
             enemies_killed = enemies_killed + 1
 
-        if random.randint(0,3000) > 2990:
+        if random.randint(0,3000) > 2965:
             spear = Spear(self.rect.x, self.rect.y)
             weapon_sprite_list.add(spear)
 
