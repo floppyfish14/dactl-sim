@@ -16,7 +16,7 @@ BLUE = (50, 50, 255)
 SKY = (101, 202, 246)
 DKGREEN = (0, 100, 0)
 
-# create the enemy kill counter
+# create the stickman kill counter
 enemies_killed = 0
  
 # This class represents the player
@@ -37,7 +37,14 @@ class Player(pygame.sprite.Sprite):
  
         # Fetch the rectangle object that has the dimensions of the image
         self.rect = self.image.get_rect()
- 
+    
+    def turn_around(self):
+        global direction
+        self.image = pygame.transform.flip(self.image, True, False)
+        if direction:
+            direction = False
+        else:
+            direction = True
     # Update the position of the player
     def update(self):
         # Get the current mouse position. This returns the position
@@ -65,6 +72,42 @@ class Player(pygame.sprite.Sprite):
                 clear_data()
 
         self.rect.clamp_ip(0, 0, screen_width, screen_height-60)
+
+class Laser(pygame.sprite.Sprite):
+    def __init__(self, pos):
+        super().__init__()
+
+        # Variables to hold the height and width of the block
+        width = 10
+        height = 2
+
+        global direction
+
+
+        # make it look like it is coming out of dactl's face
+        if direction:
+            x = pos[0]+45
+            y = pos[1]+14
+        else:
+            x = pos[0]-45
+            y = pos[1]+14
+
+        self.image = pygame.image.load('laser.png')
+        self.rect = self.image.get_rect()
+
+        self.rect.x = x
+        self.rect.y = y
+
+        self.direction = direction
+
+    def update(self):
+
+        if self.direction:
+            self.rect.x += 20
+        else:
+            self.rect.x -= 20
+            
+
 
 class Poop(pygame.sprite.Sprite):
     def __init__(self, pos):
@@ -112,7 +155,7 @@ class Spear(pygame.sprite.Sprite):
 
 
 
-class Enemy(pygame.sprite.Sprite):
+class Stickman(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
 
@@ -159,6 +202,44 @@ class Enemy(pygame.sprite.Sprite):
             spear = Spear(self.rect.x, self.rect.y)
             weapon_sprite_list.add(spear)
 
+class Plane(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+
+        # Variables to hold the height and width of the block
+        width = 20
+        height = 15
+
+        x = random.randint(0,screen_width)
+        y = random.randint(300,screen_height)
+
+        self.image = pygame.image.load('plane.png')
+        self.rect = self.image.get_rect()
+
+        self.rect.x = x
+        self.rect.y = y
+
+        self.speed_x = random.randint(-5, 5)
+
+    def update(self):
+
+        self.collision = pygame.sprite.spritecollide(self, [poop_sprite_list,laser_sprite_list], True)
+        self.rect.x += self.speed_x
+
+        self.rect.clamp_ip(0, 0, screen_width-20, screen_height-60)
+
+        if self.rect.x == 0 or self.rect.right >= screen_width-20:
+            self.speed_x = -self.speed_x
+
+        if self.collision:
+            self.kill()
+            global enemies_killed 
+            global start
+            if not start:
+                pass
+            elif start:
+                enemies_killed = enemies_killed + 1
+
 def updateKillCount():
     font = pygame.font.Font('freesansbold.ttf', 32)
  
@@ -174,7 +255,7 @@ def updateKillCount():
     textRect.center = (screen_width // 2, screen_height // 2)
 
     screen.blit(text, textRect)
-    pygame.display.update()
+    # pygame.display.update()
 
 def splash_screen():
     start_game = pygame.image.load('start.png')
@@ -183,7 +264,7 @@ def splash_screen():
 
     # create a text surface object,
     # on which text is drawn on it.
-    text = font.render('Press any key to start...', True, BLACK)
+    text = font.render('Press spacebar to start...', True, BLACK)
     
     # create a rectangular object for the
     # text surface object
@@ -194,7 +275,7 @@ def splash_screen():
 
     screen.blit(text, textRect)
 
-    pygame.display.update()
+    # pygame.display.update()
 
 def clear_data():
     global done
@@ -212,7 +293,7 @@ def clear_data():
     enemy_sprite_list.empty()
     weapon_sprite_list.empty()
     poop_sprite_list.empty()
-    pygame.display.update()  
+    pygame.display.update()
 
 # Set the height and width of the screen
 size = [1400, 800]
@@ -227,6 +308,7 @@ pygame.mouse.set_visible(False)
 # Loop until the user clicks the close button.
 done = False
 start = False
+direction = False
  
 # Used to manage how fast the screen updates
 clock = pygame.time.Clock()
@@ -237,6 +319,9 @@ player_sprite_list = pygame.sprite.Group()
 poop_sprite_list = pygame.sprite.Group()
 enemy_sprite_list = pygame.sprite.Group()
 weapon_sprite_list = pygame.sprite.Group()
+plane_sprite_list = pygame.sprite.Group()
+laser_sprite_list = pygame.sprite.Group()
+
 
 # This represents the ball controlled by the player
 player = Player()
@@ -249,22 +334,31 @@ while not done:
     cursor_pos = pygame.mouse.get_pos()
 
     while len(enemy_sprite_list) < 5:
-        enemy = Enemy()
-        enemy_sprite_list.add(enemy)
+        stickman = Stickman()
+        enemy_sprite_list.add(stickman)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             done = True
-        if event.type == pygame.KEYDOWN:
-            start = True
         if event.type == pygame.MOUSEBUTTONDOWN:
             poop_sprite_list.add(Poop(cursor_pos))
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE:
+                start = True
+            if event.key == pygame.K_a:
+                laser_sprite_list.add(Laser(cursor_pos))
+            if event.key == pygame.K_f:
+                player.turn_around()
+        # detect letter a or j
+        # shoot laser based on letter
 
     # --- Game logic
     player_sprite_list.update()
     poop_sprite_list.update()
     enemy_sprite_list.update()
     weapon_sprite_list.update()
+    plane_sprite_list.update()
+    laser_sprite_list.update()
  
     # --- Display / Drawing code
  
@@ -273,16 +367,20 @@ while not done:
 
     # draw the ground
     ground = pygame.draw.rect(screen, DKGREEN, pygame.Rect(0, screen_height-60, screen_width, 60))
+
+    if start == False:
+        splash_screen()
  
-    # Update the position of the ball (using the mouse) and draw the ball
+    # Update the position of the sprites and draw them
     player_sprite_list.draw(screen)
     poop_sprite_list.draw(screen)
     enemy_sprite_list.draw(screen)
     weapon_sprite_list.draw(screen)
-    updateKillCount()
+    plane_sprite_list.draw(screen)
+    laser_sprite_list.draw(screen)
 
-    if start == False:
-        splash_screen()
+    if start == True:
+        updateKillCount()
 
     # Limit to 60 frames per second
     clock.tick(60)
