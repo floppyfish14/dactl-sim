@@ -59,7 +59,8 @@ class Player(pygame.sprite.Sprite):
 
         self.collision = pygame.sprite.spritecollide(self, weapon_sprite_list, True)
         if self.collision:
-            pygame.quit()
+            global done
+            done = True
 
         self.rect.clamp_ip(0, 0, screen_width, screen_height-60)
 
@@ -140,7 +141,7 @@ class Enemy(pygame.sprite.Sprite):
 
         self.rect.clamp_ip(0, 0, screen_width-20, screen_height-60)
 
-        if self.rect.x is 0 or self.rect.right >= screen_width-20:
+        if self.rect.x == 0 or self.rect.right >= screen_width-20:
             self.speed_x = -self.speed_x
 
         if self.collision:
@@ -234,7 +235,7 @@ while not done:
     updateKillCount()
 
     # Limit to 60 frames per second
-    clock.tick(240)
+    clock.tick(60)
  
     # Go ahead and update the screen with what we've drawn.
     pygame.display.flip()
