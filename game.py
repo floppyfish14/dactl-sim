@@ -59,8 +59,10 @@ class Player(pygame.sprite.Sprite):
 
         self.collision = pygame.sprite.spritecollide(self, weapon_sprite_list, True)
         if self.collision:
+            global start
             global done
-            done = True
+            if start == True:
+                clear_data()
 
         self.rect.clamp_ip(0, 0, screen_width, screen_height-60)
 
@@ -147,7 +149,11 @@ class Enemy(pygame.sprite.Sprite):
         if self.collision:
             self.kill()
             global enemies_killed 
-            enemies_killed = enemies_killed + 1
+            global start
+            if not start:
+                pass
+            elif start:
+                enemies_killed = enemies_killed + 1
 
         if random.randint(0,3000) > 2965:
             spear = Spear(self.rect.x, self.rect.y)
@@ -170,6 +176,44 @@ def updateKillCount():
     screen.blit(text, textRect)
     pygame.display.update()
 
+def splash_screen():
+    start_game = pygame.image.load('start.png')
+    screen.blit(start_game, (screen_width // 2.85, screen_height // 2.75))
+    font = pygame.font.Font('freesansbold.ttf', 32)
+
+    # create a text surface object,
+    # on which text is drawn on it.
+    text = font.render('Press any key to start...', True, BLACK)
+    
+    # create a rectangular object for the
+    # text surface object
+    textRect = text.get_rect()
+    
+    # set the center of the rectangular object.
+    textRect.center = (screen_width // 2, screen_height // 1.5)
+
+    screen.blit(text, textRect)
+
+    pygame.display.update()
+
+def clear_data():
+    global done
+    global start
+    global enemies_killed
+    global enemy_sprite_list
+    global player_sprite_list
+    global poop_sprite_list
+    global weapon_sprite_list
+
+    enemies_killed = 0
+    done = False
+    start = False
+
+    enemy_sprite_list.empty()
+    weapon_sprite_list.empty()
+    poop_sprite_list.empty()
+    pygame.display.update()  
+
 # Set the height and width of the screen
 size = [1400, 800]
 screen = pygame.display.set_mode(size)
@@ -182,6 +226,7 @@ pygame.mouse.set_visible(False)
  
 # Loop until the user clicks the close button.
 done = False
+start = False
  
 # Used to manage how fast the screen updates
 clock = pygame.time.Clock()
@@ -197,7 +242,7 @@ weapon_sprite_list = pygame.sprite.Group()
 player = Player()
 
 # Add the ball to the list of player-controlled objects
-player_sprite_list.add(player)
+player_sprite_list.add(player)    
 
 # -------- Main Program Loop -----------
 while not done:
@@ -210,6 +255,8 @@ while not done:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             done = True
+        if event.type == pygame.KEYDOWN:
+            start = True
         if event.type == pygame.MOUSEBUTTONDOWN:
             poop_sprite_list.add(Poop(cursor_pos))
 
@@ -233,6 +280,9 @@ while not done:
     enemy_sprite_list.draw(screen)
     weapon_sprite_list.draw(screen)
     updateKillCount()
+
+    if start == False:
+        splash_screen()
 
     # Limit to 60 frames per second
     clock.tick(60)
