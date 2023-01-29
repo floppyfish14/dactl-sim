@@ -26,6 +26,8 @@ class Player(pygame.sprite.Sprite):
     def __init__(self):
         # Call the parent class (Sprite) constructor
         super().__init__()
+
+        self.direction = False
  
         # Variables to hold the height and width of the block
         width = 20
@@ -39,12 +41,11 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
     
     def turn_around(self):
-        global direction
         self.image = pygame.transform.flip(self.image, True, False)
-        if direction:
-            direction = False
+        if self.direction:
+            self.direction = False
         else:
-            direction = True
+            self.direction = True
     # Update the position of the player
     def update(self):
         # Get the current mouse position. This returns the position
@@ -75,15 +76,12 @@ class Player(pygame.sprite.Sprite):
         self.rect.clamp_ip(0, 0, screen_width, screen_height-60)
 
 class Laser(pygame.sprite.Sprite):
-    def __init__(self, pos):
+    def __init__(self, pos, player_direction):
         super().__init__()
 
         # Variables to hold the height and width of the block
         width = 10
         height = 2
-
-        global direction
-
 
         # make it look like it is coming out of dactl's face
         if direction:
@@ -98,8 +96,7 @@ class Laser(pygame.sprite.Sprite):
 
         self.rect.x = x
         self.rect.y = y
-
-        self.direction = direction
+        self.direction = player_direction
 
     def update(self):
 
@@ -107,8 +104,6 @@ class Laser(pygame.sprite.Sprite):
             self.rect.x += 20
         else:
             self.rect.x -= 20
-            
-
 
 class Poop(pygame.sprite.Sprite):
     def __init__(self, pos):
@@ -340,7 +335,7 @@ while not done:
     cursor_pos = pygame.mouse.get_pos()
 
     plane_rng = random.randint(0,1000)
-    if len(ufo_sprite_list) < 5:
+    if len(ufo_sprite_list) < 3:
         if plane_rng > 990:
             ufo = Ufo()
             ufo_sprite_list.add(ufo)
@@ -353,12 +348,12 @@ while not done:
         if event.type == pygame.QUIT:
             done = True
         if event.type == pygame.MOUSEBUTTONDOWN:
-            poop_sprite_list.add(Poop(cursor_pos))
+            laser_sprite_list.add(Laser(cursor_pos, player.direction))
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
                 start = True
             if event.key == pygame.K_a:
-                laser_sprite_list.add(Laser(cursor_pos))
+                poop_sprite_list.add(Poop(cursor_pos))
             if event.key == pygame.K_f:
                 player.turn_around()
 
