@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.15.1/dist/phaser-arcade-physics.min.js"></script>
+</head>
+<body>
+
+    <script>
+    var config = {
+        type: Phaser.AUTO,
+        width: window.innerWidth,
+        height: window.innerHeight,
+        physics: {
+            default: 'arcade',
+            arcade: {
+                gravity: { y: 200 }
+            }
+        },
+        scene: {
+            preload: preload,
+            create: create
+        }
+    };
+
+    var game = new Phaser.Game(config);
+
+    function preload ()
+    {
+        this.load.setBaseURL('http://localhost:8000/');
+
+        this.load.image('background', 'assets/background.png');
+        this.load.image('dactl', 'assets/dactl.png');
+        this.load.image('stickman', 'assets/stickman.png');
+        this.load.image('ufo', 'assets/ufo.png');
+        this.load.image('laser', 'assets/laser.png');
+        this.load.image('spear', 'assets/spear.png');
+        this.load.image('poop', 'assets/poop.png');
+        this.load.image('start', 'assets/start.png');
+    }
+
+    function create ()
+    {
+        let bg=this.add.image(0, 0, 'background');
+
+        bg.displayHeight=this.sys.game.config.height;
+        bg.scaleX=bg.scaleY;
+
+        bg.y=game.config.height/2;
+        bg.x=game.config.width/2;
+
+        var logo = this.physics.add.image(400, 100, 'start');
+
+        logo.setVelocity(100, 200);
+        logo.setBounce(1, 1);
+        logo.setCollideWorldBounds(true);
+    }
+    </script>
+
+</body>
+</html>
