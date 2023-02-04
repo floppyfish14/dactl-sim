@@ -35,7 +35,7 @@ class Player(pygame.sprite.Sprite):
  
         # Create an image of the player, and fill it with a color.
         # This could also be an image loaded from the disk.
-        self.image = pygame.image.load('assets/dactl.png')
+        self.image = pygame.image.load('../assets/dactl.png')
  
         # Fetch the rectangle object that has the dimensions of the image
         self.rect = self.image.get_rect()
@@ -91,7 +91,7 @@ class Laser(pygame.sprite.Sprite):
             x = pos[0]-45
             y = pos[1]+14
 
-        self.image = pygame.image.load('assets/laser.png')
+        self.image = pygame.image.load('../assets/laser.png')
         self.rect = self.image.get_rect()
 
         self.rect.x = x
@@ -117,7 +117,7 @@ class Poop(pygame.sprite.Sprite):
         x = pos[0]+22
         y = pos[1]+19
 
-        self.image = pygame.image.load('assets/poop.png')
+        self.image = pygame.image.load('../assets/poop.png')
         self.rect = self.image.get_rect()
 
         self.rect.x = x
@@ -136,7 +136,7 @@ class Spear(pygame.sprite.Sprite):
         width = 2
         height = 2
 
-        self.image = pygame.image.load('assets/spear.png')
+        self.image = pygame.image.load('../assets/spear.png')
         self.rect = self.image.get_rect()
 
         self.speed_x = random.randint(-2,2)
@@ -163,7 +163,7 @@ class Stickman(pygame.sprite.Sprite):
         x = random.randint(0,screen_width)
         y = screen_height-100
 
-        self.image = pygame.image.load('assets/stickman.png')
+        self.image = pygame.image.load('../assets/stickman.png')
         self.rect = self.image.get_rect()
 
         self.rect.x = x
@@ -209,7 +209,7 @@ class Ufo(pygame.sprite.Sprite):
         x = random.randint(0,screen_width)
         y = random.randint(0,screen_height-100)
 
-        self.image = pygame.image.load('assets/ufo.png')
+        self.image = pygame.image.load('../assets/ufo.png')
         self.rect = self.image.get_rect()
 
         self.rect.x = x
@@ -259,7 +259,7 @@ def updateKillCount():
     # pygame.display.update()
 
 def splash_screen():
-    start_game = pygame.image.load('assets/start.png')
+    start_game = pygame.image.load('../assets/start.png')
     screen.blit(start_game, (screen_width // 2.85, screen_height // 2.75))
     font = pygame.font.Font('freesansbold.ttf', 32)
 
