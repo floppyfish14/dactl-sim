@@ -10,6 +10,7 @@
         type: Phaser.AUTO,
         width: window.innerWidth,
         height: window.innerHeight,
+        autoCenter: true,
         physics: {
             default: 'arcade',
             arcade: {
@@ -18,11 +19,13 @@
         },
         scene: {
             preload: preload,
-            create: create
+            create: create,
+            update: update
         }
     };
 
     var game = new Phaser.Game(config);
+    let cursors;
 
     function preload ()
     {
@@ -36,10 +39,13 @@
         this.load.image('spear', 'assets/spear.png');
         this.load.image('poop', 'assets/poop.png');
         this.load.image('start', 'assets/start.png');
+        this.load.image('spaceBar', 'assets/spaceBar.png')
     }
 
     function create ()
     {
+        poops = this.physics.add.group();
+
         let bg=this.add.image(0, 0, 'background');
 
         bg.displayHeight=this.sys.game.config.height;
@@ -48,11 +54,49 @@
         bg.y=game.config.height/2;
         bg.x=game.config.width/2;
 
-        var logo = this.physics.add.image(400, 100, 'start');
+        logo = this.add.image(bg.x, bg.y, 'start');
+        startText = this.add.text(bg.x*0.87, bg.y*1.2, 'Press Shift to start', { color: 'black', fontSize: '24px' });
+        
+        let spaceBarImage = this.add.image(game.config.width*0.85, bg.y*0.1, 'spaceBar')
 
-        logo.setVelocity(100, 200);
-        logo.setBounce(1, 1);
-        logo.setCollideWorldBounds(true);
+        player = this.physics.add.sprite(bg.x, bg.y, 'dactl');
+        player.setCollideWorldBounds(true);
+
+        mousePointer = this.input;
+
+        //  Input Events
+        cursors = this.input.keyboard.createCursorKeys();
+
+        // logo.setVelocity(100, 200);
+        // logo.setBounce(1, 1);
+        // logo.setCollideWorldBounds(true);
+    }
+
+    function update()
+    {
+
+        player.x = mousePointer.x;
+        player.y = mousePointer.y;
+
+        if (cursors.shift.isDown) {
+            logo.visible = false;
+            startText.visible = false;
+        }
+
+        if (cursors.space.isDown) {
+            var poop = poops.create(player.x, player.y, 'poop');
+            poop.setVelocityY(+300);
+        }
+
+
+    }
+
+    function listener (sprite, pointer) {
+        var x = pointer.x;
+        var y = pointer.y;
+
+        player.x = x;
+        player.y = y;
     }
     </script>
 
