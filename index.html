@@ -25,7 +25,6 @@
     };
 
     var game = new Phaser.Game(config);
-    let cursors;
 
     function preload ()
     {
@@ -66,6 +65,8 @@
 
         //  Input Events
         cursors = this.input.keyboard.createCursorKeys();
+        spacebar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+
 
         // logo.setVelocity(100, 200);
         // logo.setBounce(1, 1);
@@ -74,29 +75,30 @@
 
     function update()
     {
+        var timer = 0;
+        var flipFlop;
 
         player.x = mousePointer.x;
         player.y = mousePointer.y;
+        player.allowedToPoop = true;
 
         if (cursors.shift.isDown) {
             logo.visible = false;
             startText.visible = false;
         }
 
-        if (cursors.space.isDown) {
+        if (Phaser.Input.Keyboard.JustDown(spacebar)) {
             var poop = poops.create(player.x, player.y, 'poop');
             poop.setVelocityY(+300);
         }
-
-
     }
 
     function listener (sprite, pointer) {
         var x = pointer.x;
         var y = pointer.y;
 
-        player.x = x;
-        player.y = y;
+        sprite.x = x;
+        sprite.y = y;
     }
     </script>
 
