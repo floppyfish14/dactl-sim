@@ -26,6 +26,9 @@
 
     var game = new Phaser.Game(config);
     var direction;
+    var isGameOver = false;
+    var killCount = 0;
+
 
     function preload ()
     {
@@ -74,10 +77,12 @@
         logo = this.add.image(bg.x, bg.y, 'start');
         startText = this.add.text(bg.x*0.87, bg.y*1.3, 'Press Shift to start', { color: 'black', fontSize: '24px' });
         
-        // show someeTexts
+        // show some instruction text
         spaceBarText = this.add.text(bg.x*0.92, bg.y*1.5, 'Spacebar = poop');
         fKeyText = this.add.text(bg.x*0.92, bg.y*1.55, 'Right Click = flip');
         mouseText = this.add.text(bg.x*0.92, bg.y*1.60, 'Left Click = laser');
+        killCountText = this.add.text(game.config.width/2-100, game.config.height/2-100, 'Kill Count: ' + killCount, { color: 'black', fontSize: '24px' });
+        killCountText.visible = false;
 
         // player sprite
         player = this.physics.add.sprite(bg.x, bg.y, 'dactl');
@@ -95,6 +100,7 @@
         mousePointer = this.input;
         cursors = this.input.keyboard.createCursorKeys();
         spacebar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+
         // shoot lasers on mouse click
         this.input.on('pointerdown', function (pointer) {
             
@@ -121,7 +127,22 @@
                 }
             } 
         }, this);
+
         // collisions
+        this.physics.add.collider(poops, stickpeople, function (poops, stickpeople) {
+            killSprites(poops, stickpeople);
+        });
+        
+        this.physics.add.collider(lasers, ufos, function (lasers, ufos) {
+            killSprites(lasers, ufos);
+        });
+
+        this.physics.add.collider(ufos, player, function (ufos, player) {
+            if (!isGameOver) {
+                isGameOver = true;
+            }
+        });
+
     }
 
     function update()
@@ -145,13 +166,19 @@
             poop.setVelocityY(+300);
         }
 
-        // collision handling
+        if (!logo.visible) {
+            killCountText.setText('Kill Count: ' + killCount);
+            killCountText.visible = true;
+        }
+        
+
     }
 
     // kill poop and sprite on collision
-    function killPoop(sprite1, sprite2) {
-        sprite1.kill();
-        sprite2.kill();
+    function killSprites(sprite1, sprite2) {
+        sprite1.destroy();
+        sprite2.destroy();
+        ++killCount;
     }
     </script>
 
