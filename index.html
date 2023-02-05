@@ -31,7 +31,14 @@
     {
         this.load.setBaseURL('http://localhost:8000/');
 
-        this.load.image('background', 'assets/background.png');
+        this.load.svg({
+            key: 'background',
+            url: 'assets/background.svg',
+            svgConfig: {
+                width: game.config.width,
+                height: game.config.height
+            }
+        });
         this.load.image('dactl', 'assets/dactl.png');
         this.load.image('stickman', 'assets/stickman.png');
         this.load.image('ufo', 'assets/ufo.png');
@@ -39,8 +46,6 @@
         this.load.image('spear', 'assets/spear.png');
         this.load.image('poop', 'assets/poop.png');
         this.load.image('start', 'assets/start.png');
-        this.load.image('spaceBar', 'assets/spaceBar.png');
-        this.load.image('fKeyText', 'assets/fKey.png');
     }
 
     function create ()
@@ -48,6 +53,7 @@
         poops = this.physics.add.group();
         lasers = this.physics.add.group({allowGravity: false});
         stickpeople = this.physics.add.group();
+        ufos = this.physics.add.group({allowGravity: false});
 
         // capture mouse for lasers
         game.input.mouse.capture = true;
@@ -56,11 +62,11 @@
         this.input.mouse.disableContextMenu();
 
         // background image
-        let bg=this.add.image(0, 0, 'background');
+        let bg = this.add.image(0,0,'background');
 
         // automagic scaling
-        bg.displayHeight=this.sys.game.config.height;
-        bg.scaleX=bg.scaleY;
+        // bg.displayHeight=this.sys.game.config.height;
+        // bg.scaleX=bg.scaleY;
         bg.y=game.config.height/2;
         bg.x=game.config.width/2;
 
@@ -69,9 +75,9 @@
         startText = this.add.text(bg.x*0.87, bg.y*1.3, 'Press Shift to start', { color: 'black', fontSize: '24px' });
         
         // show someeTexts
-        spaceBarText = this.add.text(bg.x-65, bg.y*1.5, 'Spacebar = poop');
-        fKeyText = this.add.text(bg.x-65, bg.y*1.54, 'Right Click = flip');
-        mouseText = this.add.text(bg.x-65, bg.y*1.58, 'Left Click = laser');
+        spaceBarText = this.add.text(bg.x*0.92, bg.y*1.5, 'Spacebar = poop');
+        fKeyText = this.add.text(bg.x*0.92, bg.y*1.55, 'Right Click = flip');
+        mouseText = this.add.text(bg.x*0.92, bg.y*1.60, 'Left Click = laser');
 
         // player sprite
         player = this.physics.add.sprite(bg.x, bg.y, 'dactl');
@@ -80,6 +86,10 @@
         // stickman sprites
         stickman = stickpeople.create(bg.x, bg.y, 'stickman');
         stickman.setCollideWorldBounds(true);
+
+        // ufo sprites
+        ufo = ufos.create(bg.x, bg.y, 'ufo');
+        ufo.setCollideWorldBounds(true);
 
         //  Input Events
         mousePointer = this.input;
