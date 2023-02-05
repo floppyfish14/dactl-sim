@@ -26,6 +26,7 @@
 
     var game = new Phaser.Game(config);
     var direction;
+    var isGameStarted = false;
     var isGameOver = false;
     var killCount = 0;
 
@@ -55,8 +56,6 @@
     {
         poops = this.physics.add.group();
         lasers = this.physics.add.group({allowGravity: false});
-        stickpeople = this.physics.add.group();
-        ufos = this.physics.add.group({allowGravity: false});
 
         // capture mouse for lasers
         game.input.mouse.capture = true;
@@ -67,9 +66,7 @@
         // background image
         let bg = this.add.image(0,0,'background');
 
-        // automagic scaling
-        // bg.displayHeight=this.sys.game.config.height;
-        // bg.scaleX=bg.scaleY;
+        // automagic center of screen
         bg.y=game.config.height/2;
         bg.x=game.config.width/2;
 
@@ -88,13 +85,40 @@
         player = this.physics.add.sprite(bg.x, bg.y, 'dactl');
         player.setCollideWorldBounds(true);
 
-        // stickman sprites
-        stickman = stickpeople.create(bg.x, bg.y, 'stickman');
-        stickman.setCollideWorldBounds(true);
+        // enemy sprites
+        ufos = this.physics.add.group({
+            key: 'ufo',
+            repeat: 3,
+            setXY: { x: Phaser.Math.FloatBetween(0, game.config.width), y: Phaser.Math.FloatBetween(0, game.config.height), stepX: 150, stepY: 200 },
+            allowGravity: false
+        });
 
-        // ufo sprites
-        ufo = ufos.create(bg.x, bg.y, 'ufo');
-        ufo.setCollideWorldBounds(true);
+        // give each ufo a different velocity
+        ufos.children.iterate(function (child) {
+                child.setVelocityX(Phaser.Math.FloatBetween(-1000.0, 1000.0));
+                child.setVelocityY(Phaser.Math.FloatBetween(-1000.0, 1000.0));
+                child.setCollideWorldBounds(true);
+                child.setBounce(1);
+        });
+
+        stickpeople = this.physics.add.group({
+            key: 'stickman',
+            repeat: 10,
+            setXY: { x: Phaser.Math.FloatBetween(0, game.config.width), y: game.config.height, stepX: 70 }
+        });
+
+        // give each stickman a different velocity
+        stickpeople.children.iterate(function (child) {
+                child.setVelocityX(Phaser.Math.FloatBetween(-500.0, 500.0));
+                child.setCollideWorldBounds(true);
+                child.setBounce(1);
+                if (!(child.body.velocity.x > 0)) {
+                    child.flipX = true;
+                }
+                else {
+                    child.flipX = false;
+                }
+        });
 
         //  Input Events
         mousePointer = this.input;
@@ -128,21 +152,16 @@
             } 
         }, this);
 
-        // collisions
-        this.physics.add.collider(poops, stickpeople, function (poops, stickpeople) {
-            killSprites(poops, stickpeople);
-        });
-        
-        this.physics.add.collider(lasers, ufos, function (lasers, ufos) {
-            killSprites(lasers, ufos);
-        });
 
-        this.physics.add.collider(ufos, player, function (ufos, player) {
+            // check collisions
+        this.physics.add.overlap(ufos, player, function (ufos, player) {
             if (!isGameOver) {
                 isGameOver = true;
+                isGameStarted = false;
             }
         });
-
+        this.physics.add.overlap(lasers, ufos, hideUfos, null, this);
+        this.physics.add.overlap(poops, stickpeople, hideStickpeople, null, this);
     }
 
     function update()
@@ -150,6 +169,7 @@
         // set player locaton to mouse location
         player.x = mousePointer.x;
         player.y = mousePointer.y;
+        // createEnemies();
 
         // hide start items on shift key press
         if (cursors.shift.isDown) {
@@ -158,6 +178,7 @@
             mouseText.visible = false;
             spaceBarText.visible = false;
             fKeyText.visible = false;
+            isGameStarted = true;
         }
 
         // poop on spacebar press
@@ -170,15 +191,55 @@
             killCountText.setText('Kill Count: ' + killCount);
             killCountText.visible = true;
         }
-        
 
+        if (isGameOver) {
+            killCount = 0;
+            showStart();
+        }
+    }
+
+    function showStart() {
+        logo.visible = true;
+        startText.visible = true;
+        mouseText.visible = true;
+        spaceBarText.visible = true;
+        fKeyText.visible = true;
+        killCountText.visile = false;
+        isGameOver = false;
     }
 
     // kill poop and sprite on collision
-    function killSprites(sprite1, sprite2) {
-        sprite1.destroy();
-        sprite2.destroy();
+    function hideUfos(player, ufo) {
+        ufo.disableBody(true, true);
+        if (isGameStarted === true) {
+            ++killCount;
+        }
+
+        if (ufos.countActive(true) === 0)
+        {
+            ufos.children.iterate(function (child) {
+                child.enableBody(true, child.x, child.y, true, true);
+                child.setVelocityX(Phaser.Math.FloatBetween(-1000.0, 1000.0));
+                child.setVelocityY(Phaser.Math.FloatBetween(-1000.0, 1000.0));
+                child.setCollideWorldBounds(true);
+                child.setBounce(1);
+            });
+        }
+    }
+
+    function hideStickpeople(player, stickman) {
+        stickman.disableBody(true, true);
         ++killCount;
+
+        if (stickpeople.countActive(true) === 0)
+        {
+            stickpeople.children.iterate(function (child) {
+                child.enableBody(true, child.x, 0, true, true);
+                child.setVelocityX(Phaser.Math.FloatBetween(-500.0, 500.0));
+                child.setCollideWorldBounds(true);
+                child.setBounce(1);
+            });
+        }
     }
     </script>
 
