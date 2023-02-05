@@ -25,6 +25,7 @@
     };
 
     var game = new Phaser.Game(config);
+    var direction;
 
     function preload ()
     {
@@ -44,61 +45,87 @@
     function create ()
     {
         poops = this.physics.add.group();
+        lasers = this.physics.add.group({allowGravity: false});
+        stickpeople = this.physics.add.group();
 
+        // capture mouse for lasers
+        game.input.mouse.capture = true;
+
+        // background image
         let bg=this.add.image(0, 0, 'background');
 
+        // automagic scaling
         bg.displayHeight=this.sys.game.config.height;
         bg.scaleX=bg.scaleY;
-
         bg.y=game.config.height/2;
         bg.x=game.config.width/2;
 
+        // start splash screen
         logo = this.add.image(bg.x, bg.y, 'start');
         startText = this.add.text(bg.x*0.87, bg.y*1.2, 'Press Shift to start', { color: 'black', fontSize: '24px' });
         
+        // show some instructions
         let spaceBarImage = this.add.image(game.config.width*0.85, bg.y*0.1, 'spaceBar')
 
+        // player sprite
         player = this.physics.add.sprite(bg.x, bg.y, 'dactl');
         player.setCollideWorldBounds(true);
 
-        mousePointer = this.input;
+        // stickman sprites
+        stickman = stickpeople.create(bg.x, bg.y, 'stickman');
+        stickman.setCollideWorldBounds(true);
 
         //  Input Events
+        mousePointer = this.input;
         cursors = this.input.keyboard.createCursorKeys();
         spacebar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+        fKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F);
+        // shoot lasers on mouse click
+        this.input.on('pointerdown', function (pointer) {
+            var laser = lasers.create(player.x, player.y, 'laser');
+            if (direction) {
+                laser.setVelocityX(+2000);
+            }
+            else {
+                laser.setVelocityX(-2000);
+            }
+        }, this);
 
-
-        // logo.setVelocity(100, 200);
-        // logo.setBounce(1, 1);
-        // logo.setCollideWorldBounds(true);
+        // collisions
     }
 
     function update()
     {
-        var timer = 0;
-        var flipFlop;
-
         player.x = mousePointer.x;
         player.y = mousePointer.y;
-        player.allowedToPoop = true;
 
         if (cursors.shift.isDown) {
             logo.visible = false;
             startText.visible = false;
         }
 
+        if (Phaser.Input.Keyboard.JustDown(fKey)) {
+            if (!player.flipX) {
+                player.flipX = true;
+                direction = true;
+            }
+            else {
+                player.flipX = false;
+                direction = false;
+            }
+        }
+
         if (Phaser.Input.Keyboard.JustDown(spacebar)) {
             var poop = poops.create(player.x, player.y, 'poop');
             poop.setVelocityY(+300);
         }
+
+        // collision handling
     }
 
-    function listener (sprite, pointer) {
-        var x = pointer.x;
-        var y = pointer.y;
-
-        sprite.x = x;
-        sprite.y = y;
+    function killPoop(sprite1, sprite2) {
+        sprite1.kill();
+        sprite2.kill();
     }
     </script>
 
