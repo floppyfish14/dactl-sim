@@ -30,6 +30,30 @@
     var isGameOver = false;
     var killCount = 0;
 
+    // class SpearGroup extends Phaser.Physics.Arcade.Group
+    // {
+    //     constructor(scene) {
+    //         // Call the super constructor, passing in a world and a scene
+    //         super(scene.physics.world, scene);
+    
+    //         // Initialize the group
+    //         this.createMultiple({
+    //             classType: Spear, // This is the class we create just below
+    //             frameQuantity: 30, // Create 30 instances in the pool
+    //             active: false,
+    //             visible: false,
+    //             key: 'spear'
+    //         });
+    //     }
+
+    // }
+
+    // class Spear extends Phaser.Physics.Arcade.Sprite {
+	// constructor(scene, x, y) {
+	// 	super(scene, x, y, 'spear');
+	// }
+    // }
+
 
     function preload ()
     {
@@ -56,6 +80,7 @@
     {
         poops = this.physics.add.group();
         lasers = this.physics.add.group({allowGravity: false});
+        spears = this.physics.add.group();
 
         // capture mouse for lasers
         game.input.mouse.capture = true;
@@ -119,6 +144,12 @@
                 else {
                     child.flipX = false;
                 }
+
+                var spear = spears.create(child.x, child.y, 'spear');
+                spear.setVelocityY(Phaser.Math.FloatBetween(-100,-700));
+                spear.setVelocityX(Phaser.Math.FloatBetween(-300, 300));
+                // spear.angle(spear.velocityY/spear.velocityX);
+                spear.angle(10);
         });
 
         //  Input Events
@@ -241,30 +272,6 @@
                 child.setBounce(1);
             });
         }
-    }
-
-    class SpearGroup extends Phaser.Physics.Arcade.Group
-    {
-        constructor(scene) {
-            // Call the super constructor, passing in a world and a scene
-            super(scene.physics.world, scene);
-    
-            // Initialize the group
-            this.createMultiple({
-                classType: Spear, // This is the class we create just below
-                frameQuantity: 30, // Create 30 instances in the pool
-                active: false,
-                visible: false,
-                key: 'spear'
-            });
-        }
-
-    }
-
-    class Spear extends Phaser.Physics.Arcade.Sprite {
-	constructor(scene, x, y) {
-		super(scene, x, y, 'spear');
-	}
     }
     </script>
 
