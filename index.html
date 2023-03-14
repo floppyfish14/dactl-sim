@@ -14,6 +14,7 @@
         physics: {
             default: 'arcade',
             arcade: {
+                debug: true,
                 gravity: { y: 200 }
             }
         },
@@ -29,31 +30,6 @@
     var isGameStarted = false;
     var isGameOver = false;
     var killCount = 0;
-
-    // class SpearGroup extends Phaser.Physics.Arcade.Group
-    // {
-    //     constructor(scene) {
-    //         // Call the super constructor, passing in a world and a scene
-    //         super(scene.physics.world, scene);
-    
-    //         // Initialize the group
-    //         this.createMultiple({
-    //             classType: Spear, // This is the class we create just below
-    //             frameQuantity: 30, // Create 30 instances in the pool
-    //             active: false,
-    //             visible: false,
-    //             key: 'spear'
-    //         });
-    //     }
-
-    // }
-
-    // class Spear extends Phaser.Physics.Arcade.Sprite {
-	// constructor(scene, x, y) {
-	// 	super(scene, x, y, 'spear');
-	// }
-    // }
-
 
     function preload ()
     {
@@ -109,6 +85,7 @@
         // player sprite
         player = this.physics.add.sprite(bg.x, bg.y, 'dactl');
         player.setCollideWorldBounds(true);
+        player.body.allowGravity = false;
 
         // enemy sprites
         ufos = this.physics.add.group({
@@ -137,19 +114,6 @@
                 child.setVelocityX(Phaser.Math.FloatBetween(-500.0, 500.0));
                 child.setCollideWorldBounds(true);
                 child.setBounce(1);
-                // child.spearGroup = new SpearGroup(child);
-                if (!(child.body.velocity.x > 0)) {
-                    child.flipX = true;
-                }
-                else {
-                    child.flipX = false;
-                }
-
-                var spear = spears.create(child.x, child.y, 'spear');
-                spear.setVelocityY(Phaser.Math.FloatBetween(-100,-700));
-                spear.setVelocityX(Phaser.Math.FloatBetween(-300, 300));
-                // spear.angle(spear.velocityY/spear.velocityX);
-                // spear.angle(10);   
         });
 
         //  Input Events
@@ -185,15 +149,14 @@
         }, this);
 
 
-            // check collisions
-        this.physics.add.overlap(ufos, player, function (ufos, player) {
-            if (!isGameOver) {
-                isGameOver = true;
-                isGameStarted = false;
-            }
-        });
+        // collisions that kill the player
+        this.physics.add.overlap(ufos, player, killPlayer, null, this);
+        this.physics.add.overlap(spears, player, killPlayer, null, this);
+
+        // collisions that the player controls
         this.physics.add.overlap(lasers, ufos, hideUfos, null, this);
         this.physics.add.overlap(poops, stickpeople, hideStickpeople, null, this);
+        this.physics.add.overlap(poops, spears, hideObject, null, this)
     }
 
     function update()
@@ -224,10 +187,28 @@
             killCountText.visible = true;
         }
 
-        if (isGameOver) {
+        if (isGameOver === true) {
             killCount = 0;
             showStart();
         }
+
+        var spearThrower = stickpeople.getChildren();
+        spearThrower.forEach(element => {
+            createSpear(element.x,element.y);
+            if (!(element.body.velocity.x > 0)) {
+                    element.flipX = true;
+            }
+            else {
+                element.flipX = false;
+            }
+        });
+
+        var currentSpears = spears.getChildren();
+        currentSpears.forEach(element => {
+            // var spearAngle = element.body.position.x - 
+            // element.setRotation(element.body.position.x + (element.body.position.x - element.body.prev.x) * 2/element.body.position.y + (element.body.position.y - element.body.prev.y) *2);
+        });
+
     }
 
     function showStart() {
@@ -236,14 +217,26 @@
         mouseText.visible = true;
         spaceBarText.visible = true;
         fKeyText.visible = true;
-        killCountText.visile = false;
+        killCountText.visible = false;
         isGameOver = false;
+    }
+
+    function killPlayer(item) {
+        if (!isGameOver) {
+                isGameOver = true;
+                isGameStarted = false;
+        }
+        showStart();
+    }
+
+    function hideObject(player, object) {
+        object.disableBody(true, true);
     }
 
     // kill poop and sprite on collision
     function hideUfos(player, ufo) {
         ufo.disableBody(true, true);
-        if (isGameStarted === true) {
+        if (isGameStarted) {
             ++killCount;
         }
 
@@ -261,8 +254,9 @@
 
     function hideStickpeople(player, stickman) {
         stickman.disableBody(true, true);
-        ++killCount;
-
+        if (isGameStarted) {
+            ++killCount;
+        }
         if (stickpeople.countActive(true) === 0)
         {
             stickpeople.children.iterate(function (child) {
@@ -271,6 +265,14 @@
                 child.setCollideWorldBounds(true);
                 child.setBounce(1);
             });
+        }
+    }
+
+    function createSpear(x, y) {
+        if ((Phaser.Math.FloatBetween(-1000.0, 1000.0) > 990)) {
+            var spear = spears.create(x, y, 'spear');
+            spear.setVelocityY(Phaser.Math.FloatBetween(-100,-700));
+            spear.setVelocityX(Phaser.Math.FloatBetween(-300, 300));
         }
     }
     </script>
