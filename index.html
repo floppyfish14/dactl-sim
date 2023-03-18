@@ -14,7 +14,7 @@
         physics: {
             default: 'arcade',
             arcade: {
-                debug: true,
+                // debug: true,
                 gravity: { y: 200 }
             }
         },
@@ -203,6 +203,19 @@
             }
         });
 
+        if (ufos.countActive(true) === 0)
+        {
+            var newx = (player.x < (game.config.width/2)) ? Phaser.Math.Between((game.config.width/2), game.config.width) : Phaser.Math.Between(0, (game.config.width/2));
+            var newy = Phaser.Math.Between(0, game.config.height)
+            ufos.children.iterate(function (child) {
+                child.enableBody(true, newx, Phaser.Math.Between(0, game.config.height), true, true);
+                child.setVelocityX(Phaser.Math.FloatBetween(-1000.0, 1000.0));
+                child.setVelocityY(Phaser.Math.FloatBetween(-1000.0, 1000.0));
+                child.setCollideWorldBounds(true);
+                child.setBounce(1);
+            });
+        }
+
         var currentSpears = spears.getChildren();
         currentSpears.forEach(element => {
             // var spearAngle = element.body.position.x - 
@@ -231,6 +244,7 @@
 
     function hideObject(player, object) {
         object.disableBody(true, true);
+        object.Destroy()
     }
 
     // kill poop and sprite on collision
@@ -238,17 +252,6 @@
         ufo.disableBody(true, true);
         if (isGameStarted) {
             ++killCount;
-        }
-
-        if (ufos.countActive(true) === 0)
-        {
-            ufos.children.iterate(function (child) {
-                child.enableBody(true, child.x, child.y, true, true);
-                child.setVelocityX(Phaser.Math.FloatBetween(-1000.0, 1000.0));
-                child.setVelocityY(Phaser.Math.FloatBetween(-1000.0, 1000.0));
-                child.setCollideWorldBounds(true);
-                child.setBounce(1);
-            });
         }
     }
 
